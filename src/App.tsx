@@ -306,7 +306,17 @@ export const App: React.FC = () => {
             saveHistory([]);
           }}
         />
-
+   <div className="flex-1 overflow-hidden min-h-0">
+                <AnswerPanel
+                  answer={currentAnswer}
+                  isStreaming={isStreaming}
+                  onRegenerate={() => {
+                    if (currentQuestion) generateAnswerForQuestion(currentQuestion);
+                  }}
+                  onClear={() => setCurrentAnswer(null)}
+                  error={aiError}
+                />
+              </div>
         {/* Dashboard Panels */}
         <main className="flex-1 flex flex-col p-4 gap-4 overflow-hidden">
           {/* Audio Visualizer & Control Bar */}
@@ -316,6 +326,18 @@ export const App: React.FC = () => {
             selectedDeviceId={settings.audioInputDeviceId}
             onSelectDevice={(id) => handleUpdateSettings({ ...settings, audioInputDeviceId: id })}
           />
+ {/* Question Panel */}
+              <div className="flex-shrink-0">
+                <DetectedQuestionPanel
+                  question={currentQuestion}
+                  onAskAI={generateAnswerForQuestion}
+                  onManualSubmit={handleManualAsk}
+                  isGenerating={isStreaming}
+                  profile={profile}
+                  onOpenProfile={() => setProfileOpen(true)}
+                  latestHeardText={latestHeardText}
+                />
+              </div>
 
           {/* Core Content Grid */}
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden min-h-0">
@@ -332,31 +354,9 @@ export const App: React.FC = () => {
 
             {/* Right Column: Detected Question & DeepSeek Live Answer (7 cols) */}
             <div className="lg:col-span-7 h-full overflow-hidden flex flex-col gap-4">
-              {/* Question Panel */}
-              <div className="flex-shrink-0">
-                <DetectedQuestionPanel
-                  question={currentQuestion}
-                  onAskAI={generateAnswerForQuestion}
-                  onManualSubmit={handleManualAsk}
-                  isGenerating={isStreaming}
-                  profile={profile}
-                  onOpenProfile={() => setProfileOpen(true)}
-                  latestHeardText={latestHeardText}
-                />
-              </div>
-
+             
               {/* Streaming Answer Panel */}
-              <div className="flex-1 overflow-hidden min-h-0">
-                <AnswerPanel
-                  answer={currentAnswer}
-                  isStreaming={isStreaming}
-                  onRegenerate={() => {
-                    if (currentQuestion) generateAnswerForQuestion(currentQuestion);
-                  }}
-                  onClear={() => setCurrentAnswer(null)}
-                  error={aiError}
-                />
-              </div>
+           
             </div>
           </div>
         </main>

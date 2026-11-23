@@ -28,7 +28,6 @@ export const AnswerPanel: React.FC<AnswerPanelProps> = ({
   error,
 }) => {
   const [copied, setCopied] = useState(false);
-  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('large');
 
   const handleCopy = () => {
     if (!answer?.content) return;
@@ -58,34 +57,6 @@ export const AnswerPanel: React.FC<AnswerPanelProps> = ({
 
         {answer && (
           <div className="flex items-center gap-2">
-            {/* Font size toggle */}
-            <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5 border border-white/5 text-[10px] text-slate-400">
-              <button
-                type="button"
-                onClick={() => setFontSize('normal')}
-                className={`px-1.5 py-0.5 rounded ${fontSize === 'normal' ? 'bg-sky-500 text-white font-bold' : 'hover:text-white'}`}
-                title="Normal text"
-              >
-                A
-              </button>
-              <button
-                type="button"
-                onClick={() => setFontSize('large')}
-                className={`px-1.5 py-0.5 rounded ${fontSize === 'large' ? 'bg-sky-500 text-white font-bold' : 'hover:text-white'}`}
-                title="Large text"
-              >
-                A+
-              </button>
-              <button
-                type="button"
-                onClick={() => setFontSize('xlarge')}
-                className={`px-1.5 py-0.5 rounded ${fontSize === 'xlarge' ? 'bg-sky-500 text-white font-bold' : 'hover:text-white'}`}
-                title="Extra Large text"
-              >
-                A++
-              </button>
-            </div>
-
             {/* Latency & Word Count */}
             <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
               <span className="flex items-center gap-1">
@@ -150,15 +121,7 @@ export const AnswerPanel: React.FC<AnswerPanelProps> = ({
             <div className="h-20 bg-slate-900 rounded-xl border border-white/5 animate-pulse mt-4" />
           </div>
         ) : answer?.content ? (
-          <div
-            className={`text-slate-100 whitespace-pre-wrap font-sans select-text leading-relaxed tracking-wide ${
-              fontSize === 'xlarge'
-                ? 'text-lg md:text-xl font-medium'
-                : fontSize === 'large'
-                ? 'text-base md:text-[17px]'
-                : 'text-sm'
-            }`}
-          >
+          <div className="text-slate-100 text-sm leading-relaxed whitespace-pre-wrap font-sans select-text">
             {answer.content}
           </div>
         ) : (

@@ -10,16 +10,12 @@ import {
   X,
   Radio,
   Cpu,
-  PanelLeft,
-  PanelLeftClose,
 } from 'lucide-react';
 import { AIProvider, AppSettings, CandidateProfile } from '../types';
 
 interface NavbarProps {
   settings: AppSettings;
   profile?: CandidateProfile;
-  sidebarOpen?: boolean;
-  onToggleSidebar?: () => void;
   onUpdateSettings: (newSettings: AppSettings) => void;
   onOpenSettings: () => void;
   onOpenProfile: () => void;
@@ -31,8 +27,6 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   settings,
   profile,
-  sidebarOpen = false,
-  onToggleSidebar,
   onUpdateSettings,
   onOpenSettings,
   onOpenProfile,
@@ -58,20 +52,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="h-14 border-b border-white/5 bg-[#0b1120]/80 backdrop-blur-md px-4 flex items-center justify-between select-none drag-region">
       {/* Brand & Status */}
       <div className="flex items-center gap-3 no-drag-region">
-        {onToggleSidebar && (
-          <button
-            onClick={onToggleSidebar}
-            title={sidebarOpen ? 'Close Session History Sidebar' : 'Open Session History Sidebar'}
-            className={`p-1.5 rounded-lg border transition-all ${
-              sidebarOpen
-                ? 'bg-sky-500/20 text-sky-400 border-sky-500/30'
-                : 'bg-white/5 text-slate-400 border-white/10 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            {sidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
-          </button>
-        )}
-
         <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 via-sky-500 to-cyan-400 p-[1px] shadow-lg shadow-sky-500/20">
           <div className="w-full h-full bg-[#090D16] rounded-lg flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-sky-400 animate-pulse" />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { History, Trash2, ArrowUpRight, MessageSquareText, PanelLeftClose, ChevronLeft } from 'lucide-react';
+import { History, Trash2, ArrowUpRight, MessageSquareText } from 'lucide-react';
 import { SessionHistoryItem } from '../types';
 
 interface SidebarProps {
@@ -7,8 +7,6 @@ interface SidebarProps {
   onSelectHistory: (item: SessionHistoryItem) => void;
   onClearHistory: () => void;
   activeId?: string;
-  isOpen?: boolean;
-  onClose?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -16,15 +14,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectHistory,
   onClearHistory,
   activeId,
-  isOpen = true,
-  onClose,
 }) => {
-  if (!isOpen) return null;
-
   return (
-    <aside className="w-72 border-r border-white/5 bg-[#0b1120]/80 backdrop-blur-md flex flex-col h-full overflow-hidden select-none transition-all flex-shrink-0">
+    <aside className="w-72 border-r border-white/5 bg-[#0b1120]/60 backdrop-blur-md flex flex-col h-full overflow-hidden select-none">
       {/* Header */}
-      <div className="p-3.5 border-b border-white/5 flex items-center justify-between bg-slate-950/40">
+      <div className="p-3.5 border-b border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History className="w-4 h-4 text-sky-400" />
           <h2 className="text-xs font-bold text-white uppercase tracking-wider">
@@ -35,27 +29,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-1">
-          {history.length > 0 && (
-            <button
-              onClick={onClearHistory}
-              className="p-1 rounded text-slate-500 hover:text-rose-400 transition-colors"
-              title="Clear Session History"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          )}
-
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10 transition-colors ml-1"
-              title="Close Sidebar"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+        {history.length > 0 && (
+          <button
+            onClick={onClearHistory}
+            className="p-1 rounded text-slate-500 hover:text-rose-400 transition-colors"
+            title="Clear Session History"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* History Items List */}
