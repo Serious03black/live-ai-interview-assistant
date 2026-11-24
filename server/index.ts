@@ -27,6 +27,45 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: Date.now(), service: 'Live AI Interview Assistant Server' });
 });
 
+function broadcast(messageObj: any) {
+  const payload = JSON.stringify(messageObj);
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(payload);
+    }
+  });
+}
+
+// Endpoint for receiving subtitles from Google Meet or external scripts
+app.post('/api/captions', (req, res) => {
+  const { text, isFinal = true } = req.body;
+  if (!text) {
+    res.status(400).json({ error: 'Text is required' });
+    return;
+  }
+
+  const detection = detectQuestion(text);
+
+  broadcast({
+    type: 'TRANSCRIPT_SEGMENT',
+    text,
+    isFinal,
+    timestamp: Date.now(),
+  });
+
+  if (detection.isQuestion) {
+    broadcast({
+      type: 'QUESTION_DETECTED',
+      question: detection.questionText,
+      category: detection.category,
+      confidence: detection.confidence,
+      timestamp: Date.now(),
+    });
+  }
+
+  res.json({ success: true, isQuestion: detection.isQuestion, category: detection.category });
+});
+
 // WebSocket for real-time speech and question events
 wss.on('connection', (ws: WebSocket) => {
   ws.send(JSON.stringify({ type: 'CONNECTED', message: 'Connected to Live AI Interview Assistant WebSocket' }));
@@ -35,19 +74,26 @@ wss.on('connection', (ws: WebSocket) => {
     try {
       const data = JSON.parse(message.toString());
 
-      // Client sends live speech segment
+      // Client sends live speech segment or Google Meet subtitle
       if (data.type === 'SPEECH_TRANSCRIPT') {
         const text = data.text || '';
         const detection = detectQuestion(text);
 
+        broadcast({
+          type: 'TRANSCRIPT_SEGMENT',
+          text,
+          isFinal: data.isFinal ?? true,
+          timestamp: Date.now(),
+        });
+
         if (detection.isQuestion) {
-          ws.send(JSON.stringify({
+          broadcast({
             type: 'QUESTION_DETECTED',
             question: detection.questionText,
             category: detection.category,
             confidence: detection.confidence,
             timestamp: Date.now(),
-          }));
+          });
         }
       }
     } catch {

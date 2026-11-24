@@ -58,8 +58,8 @@ export class SpeechRecognitionService {
       };
 
       this.recognition.onerror = (event: any) => {
-        // "no-speech" error is natural during silences in continuous listening
-        if (event.error !== 'no-speech' && this.onErrorCallback) {
+        // "no-speech" and "aborted" are normal lifecycle events during pauses, focus shifts, or restarts
+        if (event.error !== 'no-speech' && event.error !== 'aborted' && this.onErrorCallback) {
           this.onErrorCallback(event.error);
         }
       };

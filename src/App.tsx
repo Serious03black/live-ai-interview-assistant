@@ -7,6 +7,7 @@ import { DetectedQuestionPanel } from './components/DetectedQuestion';
 import { AnswerPanel } from './components/AnswerPanel';
 import { SettingsModal } from './components/SettingsModal';
 import { ProfileModal } from './components/ProfileModal';
+import { GoogleMeetSyncModal } from './components/GoogleMeetSyncModal';
 import {
   AppSettings,
   CandidateProfile,
@@ -43,6 +44,7 @@ export const App: React.FC = () => {
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [meetModalOpen, setMeetModalOpen] = useState(false);
   const [alwaysOnTop, setAlwaysOnTop] = useState(settings.alwaysOnTop);
   const [serverOnline, setServerOnline] = useState(false);
 
@@ -201,6 +203,64 @@ export const App: React.FC = () => {
     [settings.autoGenerateAnswer, generateAnswerForQuestion]
   );
 
+  // Connect to local WebSocket to receive Google Meet subtitles / external transcripts
+  useEffect(() => {
+    let ws: WebSocket | null = null;
+    let reconnectTimer: any = null;
+
+    const connect = () => {
+      try {
+        ws = new WebSocket('ws://localhost:3001');
+        wsRef.current = ws;
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'TRANSCRIPT_SEGMENT' && data.text) {
+              handleTranscript({
+                id: 'meet_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                text: data.text,
+                isFinal: data.isFinal ?? true,
+                timestamp: data.timestamp || Date.now(),
+              });
+            } else if (data.type === 'QUESTION_DETECTED' && data.question) {
+              const detected: DetectedQuestion = {
+                id: 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                text: data.question,
+                category: data.category || 'TECHNICAL',
+                confidence: data.confidence || 0.95,
+                timestamp: data.timestamp || Date.now(),
+                source: 'auto_speech',
+              };
+              setCurrentQuestion(detected);
+              if (settings.autoGenerateAnswer) {
+                generateAnswerForQuestion(detected);
+              }
+            }
+          } catch {
+            // ignore
+          }
+        };
+
+        ws.onclose = () => {
+          reconnectTimer = setTimeout(connect, 4000);
+        };
+        ws.onerror = () => {
+          // ignore error, close handler will trigger reconnect
+        };
+      } catch {
+        reconnectTimer = setTimeout(connect, 4000);
+      }
+    };
+
+    connect();
+
+    return () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      ws?.close();
+    };
+  }, [handleTranscript, settings.autoGenerateAnswer, generateAnswerForQuestion]);
+
   // Handle manual question submission
   const handleManualAsk = useCallback(
     (text: string) => {
@@ -229,6 +289,7 @@ export const App: React.FC = () => {
       speechRecognitionService.start(
         handleTranscript,
         (err) => {
+          if (err === 'aborted') return;
           console.warn('Speech Recognition notice:', err);
           if (err === 'network') {
             setSpeechError(
@@ -284,6 +345,7 @@ export const App: React.FC = () => {
         onUpdateSettings={handleUpdateSettings}
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenProfile={() => setProfileOpen(true)}
+        onOpenMeetSync={() => setMeetModalOpen(true)}
         serverOnline={serverOnline}
         alwaysOnTop={alwaysOnTop}
         onToggleAlwaysOnTop={handleToggleAlwaysOnTop}
@@ -375,6 +437,12 @@ export const App: React.FC = () => {
         onClose={() => setProfileOpen(false)}
         profile={profile}
         onSave={handleUpdateProfile}
+      />
+
+      <GoogleMeetSyncModal
+        open={meetModalOpen}
+        onClose={() => setMeetModalOpen(false)}
+        serverOnline={serverOnline}
       />
     </div>
   );

@@ -10,6 +10,7 @@ import {
   X,
   Radio,
   Cpu,
+  Video,
 } from 'lucide-react';
 import { AIProvider, AppSettings, CandidateProfile } from '../types';
 
@@ -19,6 +20,7 @@ interface NavbarProps {
   onUpdateSettings: (newSettings: AppSettings) => void;
   onOpenSettings: () => void;
   onOpenProfile: () => void;
+  onOpenMeetSync?: () => void;
   serverOnline: boolean;
   alwaysOnTop: boolean;
   onToggleAlwaysOnTop: () => void;
@@ -30,6 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onUpdateSettings,
   onOpenSettings,
   onOpenProfile,
+  onOpenMeetSync,
   serverOnline,
   alwaysOnTop,
   onToggleAlwaysOnTop,
@@ -102,6 +105,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Right Actions & Window Controls */}
       <div className="flex items-center gap-1.5 no-drag-region">
+        {/* Google Meet Auto-Sync */}
+        {onOpenMeetSync && (
+          <button
+            onClick={onOpenMeetSync}
+            title="Google Meet Subtitle Auto-Sync (No microphone needed)"
+            className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 text-xs font-semibold"
+          >
+            <Video className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden md:inline">Google Meet Sync</span>
+          </button>
+        )}
+
         {/* Always on top toggle */}
         <button
           onClick={onToggleAlwaysOnTop}
