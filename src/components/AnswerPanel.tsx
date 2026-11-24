@@ -29,6 +29,7 @@ export const AnswerPanel: React.FC<AnswerPanelProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
+  
   const handleCopy = () => {
     if (!answer?.content) return;
     navigator.clipboard.writeText(answer.content);
